@@ -1,0 +1,8 @@
+// Operator-only plan catalog configuration. Does not activate billing or change subscriptions.
+import {readFileSync} from 'node:fs';
+import {z} from 'zod';
+import {openDatabase,transaction} from '../server/db.mjs';
+import {premiumFeatures} from '../server/entitlements.mjs';
+const schema=z.object({id:z.enum(['solo','team','business','enterprise']),users_limit:z.number().int().min(1).max(10000),jobs_limit:z.number().int().min(1).max(1000000),branches_limit:z.number().int().min(1).max(1000),features:z.array(z.enum(premiumFeatures)).max(premiumFeatures.length),price_cents:z.number().int().positive().max(100000000).nullable(),paypal_price_cents:z.number().int().positive().max(100000000).nullable(),paypal_plan_id:z.string().max(160).nullable(),published:z.boolean()}).strict();
+if(!process.argv[2])throw new Error('Usage: node scripts/configure-plan.mjs /private/approved-plan.json');
+const b=schema.parse(JSON.parse(readFileSync(process.argv[2],'utf8')));if(b.published&&!b.price_cents)throw new Error('Published plans require an approved ZAR price');if(b.paypal_price_cents&&!b.paypal_plan_id)throw new Error('PayPal requires a matching verified monthly USD plan ID');const db=openDatabase(process.env.DATABASE_PATH||'var/mzansiplumb.sqlite');try{transaction(db,()=>{db.prepare('UPDATE billing_plans SET users_limit=?,jobs_limit=?,branches_limit=?,features=?,price_cents=?,paypal_price_cents=?,paypal_plan_id=?,published=?,version=version+1 WHERE id=?').run(b.users_limit,b.jobs_limit,b.branches_limit,JSON.stringify([...new Set(b.features)]),b.price_cents,b.paypal_price_cents,b.paypal_plan_id,+b.published,b.id);});console.log('Plan catalog updated. Billing activation flags and company subscriptions were not changed.');}finally{db.close();}
