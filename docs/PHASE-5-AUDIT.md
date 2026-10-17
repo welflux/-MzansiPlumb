@@ -55,3 +55,7 @@ Use the exact ordered procedure in HOSTINGER-DEPLOYMENT.md (Phase 5): confirm th
 - `check:assets` remains failed for six original build assets; `preflight` remains blocked on seven production prerequisites in this development environment. Neither failure was skipped or described as a pass.
 - Restarted development services: liveness/readiness/workspace HTML returned 200; worker current; all six migrations applied; SQLite integrity `ok`; no foreign-key errors; ordinary database has zero seeded users.
 - Updated cloud install/start instructions are saved in a reviewable draft. Saving did not publish the environment, apply pending network policy or deploy to Hostinger.
+
+## Follow-up: reference artwork
+
+The missing-artwork file-path gate is now resolved: 22 reference-derived image/icon/logo assets decode and transparent logo alpha is verified. See design-reference/README.md and LANDING-PAGE.md for source-export limitations, literal cropping and background masks. Full visual identity with original upload bytes/layered assets is not independently verifiable; do not replace that limitation with a pixel-perfect claim. Other production gates remain unchanged. Hostinger build dependency failure was separately fixed and user screenshots confirm deployment completion on Node 24; the user subsequently reported the website serving after correcting APP_ORIGIN. Host volume persistence, real mail/payment verification and security/load/recovery acceptance remain outstanding.
